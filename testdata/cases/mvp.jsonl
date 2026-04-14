@@ -1,0 +1,3 @@
+{"case_id":"case_hello_world","prompt":"say hello","allowed_tools":[],"skill":{"name":"hello_world"},"hard_checks":{"expected_output":"hello world"},"timeout_seconds":3}
+{"case_id":"case_echo","prompt":"echo this text","allowed_tools":[],"skill":{"name":"echo"},"hard_checks":{"expected_output":"echo this text"},"timeout_seconds":3}
+{"case_id":"case_mock_tool_call","prompt":"call the mock tool","allowed_tools":["mock_tool"],"skill":{"name":"mock_tool_call"},"hard_checks":{"expected_tool_name":"mock_tool","expected_args":{"value":"ok"}},"timeout_seconds":3}
