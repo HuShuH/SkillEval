@@ -1,0 +1,4 @@
+{
+  "name": "mock_tool_call",
+  "description": "Mock skill that emits a deterministic mock tool call."
+}

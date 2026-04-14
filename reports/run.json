@@ -1,7 +1,7 @@
 {
   "total": 3,
-  "passed": 1,
-  "failed": 2,
+  "passed": 3,
+  "failed": 0,
   "results": [
     {
       "case_id": "case_hello_world",
@@ -23,13 +23,12 @@
         "name": "echo"
       },
       "agent_output": {
-        "final_output": ""
+        "final_output": "echo this text"
       },
-      "passed": false,
+      "passed": true,
       "reasons": [
-        "skill not found: echo"
+        "expected_output matched: \"echo this text\""
       ],
-      "error": "skill not found: echo",
       "duration_ms": 0
     },
     {
@@ -38,13 +37,21 @@
         "name": "mock_tool_call"
       },
       "agent_output": {
-        "final_output": ""
+        "final_output": "",
+        "tool_calls": [
+          {
+            "tool_name": "mock_tool",
+            "args": {
+              "value": "ok"
+            }
+          }
+        ]
       },
-      "passed": false,
+      "passed": true,
       "reasons": [
-        "skill not found: mock_tool_call"
+        "expected_tool_name matched: \"mock_tool\"",
+        "expected_args matched for tool \"mock_tool\""
       ],
-      "error": "skill not found: mock_tool_call",
       "duration_ms": 0
     }
   ]

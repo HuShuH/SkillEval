@@ -1,0 +1,4 @@
+{
+  "name": "echo",
+  "description": "Mock skill that returns the testcase prompt as final output."
+}
