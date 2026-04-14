@@ -1,0 +1,51 @@
+{
+  "total": 3,
+  "passed": 1,
+  "failed": 2,
+  "results": [
+    {
+      "case_id": "case_hello_world",
+      "skill": {
+        "name": "hello_world"
+      },
+      "agent_output": {
+        "final_output": "hello world"
+      },
+      "passed": true,
+      "reasons": [
+        "expected_output matched: \"hello world\""
+      ],
+      "duration_ms": 0
+    },
+    {
+      "case_id": "case_echo",
+      "skill": {
+        "name": "echo"
+      },
+      "agent_output": {
+        "final_output": ""
+      },
+      "passed": false,
+      "reasons": [
+        "skill not found: echo"
+      ],
+      "error": "skill not found: echo",
+      "duration_ms": 0
+    },
+    {
+      "case_id": "case_mock_tool_call",
+      "skill": {
+        "name": "mock_tool_call"
+      },
+      "agent_output": {
+        "final_output": ""
+      },
+      "passed": false,
+      "reasons": [
+        "skill not found: mock_tool_call"
+      ],
+      "error": "skill not found: mock_tool_call",
+      "duration_ms": 0
+    }
+  ]
+}
