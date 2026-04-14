@@ -24,6 +24,11 @@ func main() {
 			fmt.Fprintf(os.Stderr, "error: %v\n", err)
 			os.Exit(1)
 		}
+	case "validate":
+		if err := validateCommand(os.Args[2:]); err != nil {
+			fmt.Fprintf(os.Stderr, "error: %v\n", err)
+			os.Exit(1)
+		}
 	default:
 		fmt.Fprintf(os.Stderr, "error: unknown subcommand %q\n", os.Args[1])
 		printUsage()
@@ -68,7 +73,35 @@ func runCommand(args []string) error {
 	return nil
 }
 
+func validateCommand(args []string) error {
+	validateFlags := flag.NewFlagSet("validate", flag.ContinueOnError)
+	validateFlags.SetOutput(os.Stderr)
+
+	skillsDir := validateFlags.String("skills-dir", "./testdata/skills", "directory containing skill JSON files")
+	casesFile := validateFlags.String("cases-file", "./testdata/cases/mvp.jsonl", "path to testcase JSONL file")
+
+	if err := validateFlags.Parse(args); err != nil {
+		return err
+	}
+
+	reg, err := registry.LoadSkills(*skillsDir)
+	if err != nil {
+		return fmt.Errorf("load skills: %w", err)
+	}
+
+	testCases, err := runner.LoadTestCases(*casesFile)
+	if err != nil {
+		return fmt.Errorf("load testcases: %w", err)
+	}
+
+	fmt.Printf("skills loaded: %d\n", len(reg.List()))
+	fmt.Printf("testcases loaded: %d\n", len(testCases))
+	fmt.Println("validation: ok")
+	return nil
+}
+
 func printUsage() {
 	fmt.Fprintln(os.Stderr, "usage:")
 	fmt.Fprintln(os.Stderr, "  agent-eval run [--skills-dir PATH] [--cases-file PATH] [--out PATH]")
+	fmt.Fprintln(os.Stderr, "  agent-eval validate [--skills-dir PATH] [--cases-file PATH]")
 }
