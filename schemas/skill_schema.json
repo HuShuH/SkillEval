@@ -1,0 +1,124 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.local/agent-skill-eval/schemas/skill_schema.json",
+  "title": "Universal AI Agent Skill Definition",
+  "description": "Schema for describing a general-purpose AI Agent Skill.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "name",
+    "description",
+    "parameters",
+    "execution_type",
+    "safety_requirements"
+  ],
+  "properties": {
+    "name": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^[a-zA-Z0-9_.-]+$",
+      "description": "Unique skill name."
+    },
+    "description": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Human-readable skill description."
+    },
+    "version": {
+      "type": "string",
+      "default": "0.1.0",
+      "description": "Skill definition version."
+    },
+    "parameters": {
+      "type": "object",
+      "description": "JSON Schema fragment describing accepted skill input parameters.",
+      "required": ["type", "properties"],
+      "properties": {
+        "type": {
+          "const": "object"
+        },
+        "properties": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object"
+          }
+        },
+        "required": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": []
+        },
+        "additionalProperties": {
+          "type": "boolean",
+          "default": false
+        }
+      },
+      "additionalProperties": true
+    },
+    "execution_type": {
+      "type": "string",
+      "enum": [
+        "python_script",
+        "python_module",
+        "shell_command"
+      ],
+      "description": "Execution backend used by the runner."
+    },
+    "entrypoint": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Script path, module name, or command entrypoint."
+    },
+    "timeout_seconds": {
+      "type": "integer",
+      "minimum": 1,
+      "default": 30,
+      "description": "Default execution timeout for this skill."
+    },
+    "safety_requirements": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "allow_network",
+        "allow_filesystem_write",
+        "max_runtime_seconds"
+      ],
+      "properties": {
+        "allow_network": {
+          "type": "boolean",
+          "default": false
+        },
+        "allow_filesystem_write": {
+          "type": "boolean",
+          "default": false
+        },
+        "allowed_paths": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": []
+        },
+        "max_memory_mb": {
+          "type": "integer",
+          "minimum": 16,
+          "default": 256
+        },
+        "max_runtime_seconds": {
+          "type": "integer",
+          "minimum": 1,
+          "default": 30
+        }
+      }
+    },
+    "tags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": []
+    }
+  }
+}
