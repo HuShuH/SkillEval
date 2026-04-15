@@ -85,6 +85,14 @@ func validateCommand(args []string) error {
 		return err
 	}
 
+	skills, validationErrors := validate.SkillFiles(*skillsDir)
+	if len(validationErrors) > 0 {
+		for _, validationError := range validationErrors {
+			fmt.Fprintf(os.Stderr, "- %s\n", validationError)
+		}
+		return fmt.Errorf("validation failed with %d error(s)", len(validationErrors))
+	}
+
 	reg, err := registry.LoadSkills(*skillsDir)
 	if err != nil {
 		return fmt.Errorf("load skills: %w", err)
@@ -95,8 +103,7 @@ func validateCommand(args []string) error {
 		return fmt.Errorf("load testcases: %w", err)
 	}
 
-	skills := reg.List()
-	validationErrors := validate.All(skills, testCases, reg)
+	validationErrors = validate.All(skills, testCases, reg)
 	if len(validationErrors) > 0 {
 		for _, validationError := range validationErrors {
 			fmt.Fprintf(os.Stderr, "- %s\n", validationError)
