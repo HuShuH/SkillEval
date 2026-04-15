@@ -2,6 +2,8 @@
   "total": 3,
   "passed": 3,
   "failed": 0,
+  "pass_rate": 1,
+  "generated_at": "2026-04-15T13:57:14Z",
   "results": [
     {
       "case_id": "case_hello_world",

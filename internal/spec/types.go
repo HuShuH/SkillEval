@@ -44,20 +44,22 @@ type AgentOutput struct {
 
 // RunResult represents the checked result of executing one testcase.
 type RunResult struct {
-	CaseID     string      `json:"case_id"`
-	Skill      SkillRef    `json:"skill"`
+	CaseID      string      `json:"case_id"`
+	Skill       SkillRef    `json:"skill"`
 	AgentOutput AgentOutput `json:"agent_output"`
-	Passed     bool        `json:"passed"`
-	Reasons    []string    `json:"reasons,omitempty"`
-	Error      string      `json:"error,omitempty"`
-	DurationMS int64       `json:"duration_ms"`
+	Passed      bool        `json:"passed"`
+	Reasons     []string    `json:"reasons,omitempty"`
+	Error       string      `json:"error,omitempty"`
+	DurationMS  int64       `json:"duration_ms"`
 }
 
 // ReportSummary aggregates run results for final reporting.
 type ReportSummary struct {
-	Total   int         `json:"total"`
-	Passed  int         `json:"passed"`
-	Failed  int         `json:"failed"`
-	Results []RunResult `json:"results,omitempty"`
-	Error   string      `json:"error,omitempty"`
+	Total       int         `json:"total"`
+	Passed      int         `json:"passed"`
+	Failed      int         `json:"failed"`
+	PassRate    float64     `json:"pass_rate"`
+	GeneratedAt string      `json:"generated_at"`
+	Results     []RunResult `json:"results,omitempty"`
+	Error       string      `json:"error,omitempty"`
 }

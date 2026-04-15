@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"time"
 
 	"agent-skill-eval-go/internal/spec"
 )
@@ -12,8 +13,9 @@ import (
 // Summarize aggregates run results into a report summary.
 func Summarize(results []spec.RunResult) spec.ReportSummary {
 	summary := spec.ReportSummary{
-		Total:   len(results),
-		Results: results,
+		Total:       len(results),
+		GeneratedAt: time.Now().UTC().Format(time.RFC3339),
+		Results:     results,
 	}
 
 	for _, result := range results {
@@ -22,6 +24,10 @@ func Summarize(results []spec.RunResult) spec.ReportSummary {
 		} else {
 			summary.Failed++
 		}
+	}
+
+	if summary.Total > 0 {
+		summary.PassRate = float64(summary.Passed) / float64(summary.Total)
 	}
 
 	return summary
