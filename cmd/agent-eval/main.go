@@ -18,10 +18,19 @@ import (
 var errAlreadyReported = errors.New("already reported")
 
 type validateResult struct {
-	OK             bool     `json:"ok"`
-	SkillsLoaded   int      `json:"skills_loaded"`
-	TestCasesLoaded int     `json:"testcases_loaded"`
-	Errors         []string `json:"errors"`
+	OK              bool     `json:"ok"`
+	SkillsLoaded    int      `json:"skills_loaded"`
+	TestCasesLoaded int      `json:"testcases_loaded"`
+	Errors          []string `json:"errors"`
+}
+
+type runResult struct {
+	OK         bool   `json:"ok"`
+	Total      int    `json:"total,omitempty"`
+	Passed     int    `json:"passed,omitempty"`
+	Failed     int    `json:"failed,omitempty"`
+	ReportPath string `json:"report_path"`
+	Error      string `json:"error,omitempty"`
 }
 
 func main() {
@@ -33,6 +42,9 @@ func main() {
 	switch os.Args[1] {
 	case "run":
 		if err := runCommand(os.Args[2:]); err != nil {
+			if errors.Is(err, errAlreadyReported) {
+				os.Exit(1)
+			}
 			fmt.Fprintf(os.Stderr, "error: %v\n", err)
 			os.Exit(1)
 		}
@@ -58,6 +70,7 @@ func runCommand(args []string) error {
 	skillsDir := runFlags.String("skills-dir", "./testdata/skills", "directory containing skill JSON files")
 	casesFile := runFlags.String("cases-file", "./testdata/cases/mvp.jsonl", "path to testcase JSONL file")
 	outPath := runFlags.String("out", "./reports/run.json", "path to output report JSON")
+	jsonOutput := runFlags.Bool("json", false, "emit machine-readable JSON output")
 
 	if err := runFlags.Parse(args); err != nil {
 		return err
@@ -65,12 +78,12 @@ func runCommand(args []string) error {
 
 	reg, err := registry.LoadSkills(*skillsDir)
 	if err != nil {
-		return fmt.Errorf("load skills: %w", err)
+		return reportRunFailure(*jsonOutput, *outPath, fmt.Sprintf("load skills: %v", err))
 	}
 
 	testCases, err := runner.LoadTestCases(*casesFile)
 	if err != nil {
-		return fmt.Errorf("load testcases: %w", err)
+		return reportRunFailure(*jsonOutput, *outPath, fmt.Sprintf("load testcases: %v", err))
 	}
 
 	adapter := adapters.MockAdapter{}
@@ -78,7 +91,17 @@ func runCommand(args []string) error {
 	summary := report.Summarize(results)
 
 	if err := report.WriteJSON(*outPath, summary); err != nil {
-		return fmt.Errorf("write report: %w", err)
+		return reportRunFailure(*jsonOutput, *outPath, fmt.Sprintf("write report: %v", err))
+	}
+
+	if *jsonOutput {
+		return writeRunJSON(runResult{
+			OK:         true,
+			Total:      summary.Total,
+			Passed:     summary.Passed,
+			Failed:     summary.Failed,
+			ReportPath: *outPath,
+		})
 	}
 
 	fmt.Printf("total: %d\n", summary.Total)
@@ -135,6 +158,20 @@ func validateCommand(args []string) error {
 	return nil
 }
 
+func reportRunFailure(jsonOutput bool, reportPath string, errorMessage string) error {
+	if jsonOutput {
+		if err := writeRunJSON(runResult{
+			OK:         false,
+			ReportPath: reportPath,
+			Error:      errorMessage,
+		}); err != nil {
+			return err
+		}
+		return errAlreadyReported
+	}
+	return errors.New(errorMessage)
+}
+
 func reportValidateFailure(jsonOutput bool, skillsLoaded, testCasesLoaded int, validationErrors []string) error {
 	if jsonOutput {
 		if err := writeValidateJSON(validateResult{
@@ -154,6 +191,18 @@ func reportValidateFailure(jsonOutput bool, skillsLoaded, testCasesLoaded int, v
 	return fmt.Errorf("validation failed with %d error(s)", len(validationErrors))
 }
 
+func writeRunJSON(result runResult) error {
+	data, err := json.MarshalIndent(result, "", "  ")
+	if err != nil {
+		return fmt.Errorf("marshal run result: %w", err)
+	}
+	data = append(data, '\n')
+	if _, err := os.Stdout.Write(data); err != nil {
+		return fmt.Errorf("write run result: %w", err)
+	}
+	return nil
+}
+
 func writeValidateJSON(result validateResult) error {
 	data, err := json.MarshalIndent(result, "", "  ")
 	if err != nil {
@@ -168,6 +217,6 @@ func writeValidateJSON(result validateResult) error {
 
 func printUsage() {
 	fmt.Fprintln(os.Stderr, "usage:")
-	fmt.Fprintln(os.Stderr, "  agent-eval run [--skills-dir PATH] [--cases-file PATH] [--out PATH]")
+	fmt.Fprintln(os.Stderr, "  agent-eval run [--skills-dir PATH] [--cases-file PATH] [--out PATH] [--json]")
 	fmt.Fprintln(os.Stderr, "  agent-eval validate [--skills-dir PATH] [--cases-file PATH] [--json]")
 }

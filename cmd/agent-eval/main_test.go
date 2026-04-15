@@ -149,6 +149,54 @@ func TestRunSuccess(t *testing.T) {
 	}
 }
 
+func TestRunJSONSuccess(t *testing.T) {
+	reportPath := filepath.Join(t.TempDir(), "run.json")
+	output, err := runCLI(t, "run", "--json", "--out", reportPath)
+	if err != nil {
+		t.Fatalf("expected run --json to succeed, got error: %v\noutput: %s", err, output)
+	}
+
+	var result runResult
+	if err := json.Unmarshal([]byte(output), &result); err != nil {
+		t.Fatalf("expected valid JSON output, got error: %v\noutput: %s", err, output)
+	}
+	if !result.OK {
+		t.Fatalf("expected ok=true, got %+v", result)
+	}
+	if result.Total == 0 {
+		t.Fatalf("expected non-zero total, got %+v", result)
+	}
+	if result.ReportPath != reportPath {
+		t.Fatalf("expected report path %q, got %+v", reportPath, result)
+	}
+	if _, err := os.Stat(reportPath); err != nil {
+		t.Fatalf("expected report file to be written at %s: %v", reportPath, err)
+	}
+}
+
+func TestRunJSONFailure(t *testing.T) {
+	reportPath := filepath.Join(t.TempDir(), "run.json")
+	missingCases := filepath.Join(t.TempDir(), "missing.jsonl")
+	output, err := runCLI(t, "run", "--json", "--out", reportPath, "--cases-file", missingCases)
+	if err == nil {
+		t.Fatal("expected run --json to fail for missing cases file")
+	}
+
+	var result runResult
+	if err := json.Unmarshal([]byte(output), &result); err != nil {
+		t.Fatalf("expected valid JSON output, got error: %v\noutput: %s", err, output)
+	}
+	if result.OK {
+		t.Fatalf("expected ok=false, got %+v", result)
+	}
+	if result.ReportPath != reportPath {
+		t.Fatalf("expected report path %q, got %+v", reportPath, result)
+	}
+	if result.Error == "" {
+		t.Fatalf("expected error message, got %+v", result)
+	}
+}
+
 func TestHelperProcess(t *testing.T) {
 	if os.Getenv("GO_WANT_HELPER_PROCESS") != "1" {
 		return
