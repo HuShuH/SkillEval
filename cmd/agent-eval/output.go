@@ -18,9 +18,9 @@ type validateResult struct {
 
 type runResult struct {
 	OK         bool   `json:"ok"`
-	Total      int    `json:"total,omitempty"`
-	Passed     int    `json:"passed,omitempty"`
-	Failed     int    `json:"failed,omitempty"`
+	Total      int    `json:"total"`
+	Passed     int    `json:"passed"`
+	Failed     int    `json:"failed"`
 	ReportPath string `json:"report_path"`
 	Error      string `json:"error,omitempty"`
 }
@@ -29,6 +29,9 @@ func reportRunFailure(jsonOutput bool, reportPath string, errorMessage string) e
 	if jsonOutput {
 		if err := writeRunJSON(runResult{
 			OK:         false,
+			Total:      0,
+			Passed:     0,
+			Failed:     0,
 			ReportPath: reportPath,
 			Error:      errorMessage,
 		}); err != nil {

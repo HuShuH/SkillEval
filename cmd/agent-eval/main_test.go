@@ -155,6 +155,9 @@ func TestRunJSONSuccess(t *testing.T) {
 	if err != nil {
 		t.Fatalf("expected run --json to succeed, got error: %v\noutput: %s", err, output)
 	}
+	if !strings.Contains(output, `"failed":`) {
+		t.Fatalf("expected JSON output to include failed field, got: %s", output)
+	}
 
 	var result runResult
 	if err := json.Unmarshal([]byte(output), &result); err != nil {
@@ -165,6 +168,9 @@ func TestRunJSONSuccess(t *testing.T) {
 	}
 	if result.Total == 0 {
 		t.Fatalf("expected non-zero total, got %+v", result)
+	}
+	if result.Failed != 0 {
+		t.Fatalf("expected failed=0, got %+v", result)
 	}
 	if result.ReportPath != reportPath {
 		t.Fatalf("expected report path %q, got %+v", reportPath, result)

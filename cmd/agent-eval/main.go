@@ -8,7 +8,6 @@ import (
 	"os"
 
 	"agent-skill-eval-go/internal/adapters"
-	"agent-skill-eval-go/internal/registry"
 	"agent-skill-eval-go/internal/report"
 	"agent-skill-eval-go/internal/runner"
 	"agent-skill-eval-go/internal/validate"
@@ -57,18 +56,13 @@ func runCommand(args []string) error {
 		return err
 	}
 
-	reg, err := registry.LoadSkills(*skillsDir)
+	inputs, err := loadRunInputs(*skillsDir, *casesFile)
 	if err != nil {
-		return reportRunFailure(*jsonOutput, *outPath, fmt.Sprintf("load skills: %v", err))
-	}
-
-	testCases, err := runner.LoadTestCases(*casesFile)
-	if err != nil {
-		return reportRunFailure(*jsonOutput, *outPath, fmt.Sprintf("load testcases: %v", err))
+		return reportRunFailure(*jsonOutput, *outPath, err.Error())
 	}
 
 	adapter := adapters.MockAdapter{}
-	results := runner.RunCases(context.Background(), reg, adapter, testCases)
+	results := runner.RunCases(context.Background(), inputs.Registry, adapter, inputs.TestCases)
 	summary := report.Summarize(results)
 
 	if err := report.WriteJSON(*outPath, summary); err != nil {
@@ -104,37 +98,27 @@ func validateCommand(args []string) error {
 		return err
 	}
 
-	skills, validationErrors := validate.SkillFiles(*skillsDir)
+	inputs, validationErrors := loadValidateInputs(*skillsDir, *casesFile)
 	if len(validationErrors) > 0 {
-		return reportValidateFailure(*jsonOutput, len(skills), 0, validationErrors)
+		return reportValidateFailure(*jsonOutput, 0, 0, validationErrors)
 	}
 
-	reg, err := registry.LoadSkills(*skillsDir)
-	if err != nil {
-		return reportValidateFailure(*jsonOutput, len(skills), 0, []string{fmt.Sprintf("load skills: %v", err)})
-	}
-
-	testCases, err := runner.LoadTestCases(*casesFile)
-	if err != nil {
-		return reportValidateFailure(*jsonOutput, len(skills), 0, []string{fmt.Sprintf("load testcases: %v", err)})
-	}
-
-	validationErrors = validate.All(skills, testCases, reg)
+	validationErrors = validate.All(inputs.Skills, inputs.TestCases, inputs.Registry)
 	if len(validationErrors) > 0 {
-		return reportValidateFailure(*jsonOutput, len(skills), len(testCases), validationErrors)
+		return reportValidateFailure(*jsonOutput, len(inputs.Skills), len(inputs.TestCases), validationErrors)
 	}
 
 	if *jsonOutput {
 		return writeValidateJSON(validateResult{
 			OK:              true,
-			SkillsLoaded:    len(skills),
-			TestCasesLoaded: len(testCases),
+			SkillsLoaded:    len(inputs.Skills),
+			TestCasesLoaded: len(inputs.TestCases),
 			Errors:          []string{},
 		})
 	}
 
-	fmt.Printf("skills loaded: %d\n", len(skills))
-	fmt.Printf("testcases loaded: %d\n", len(testCases))
+	fmt.Printf("skills loaded: %d\n", len(inputs.Skills))
+	fmt.Printf("testcases loaded: %d\n", len(inputs.TestCases))
 	fmt.Println("validation: ok")
 	return nil
 }
