@@ -2,6 +2,8 @@ package main
 
 import (
 	"context"
+	"encoding/json"
+	"errors"
 	"flag"
 	"fmt"
 	"os"
@@ -12,6 +14,15 @@ import (
 	"agent-skill-eval-go/internal/runner"
 	"agent-skill-eval-go/internal/validate"
 )
+
+var errAlreadyReported = errors.New("already reported")
+
+type validateResult struct {
+	OK             bool     `json:"ok"`
+	SkillsLoaded   int      `json:"skills_loaded"`
+	TestCasesLoaded int     `json:"testcases_loaded"`
+	Errors         []string `json:"errors"`
+}
 
 func main() {
 	if len(os.Args) < 2 {
@@ -27,6 +38,9 @@ func main() {
 		}
 	case "validate":
 		if err := validateCommand(os.Args[2:]); err != nil {
+			if errors.Is(err, errAlreadyReported) {
+				os.Exit(1)
+			}
 			fmt.Fprintf(os.Stderr, "error: %v\n", err)
 			os.Exit(1)
 		}
@@ -80,6 +94,7 @@ func validateCommand(args []string) error {
 
 	skillsDir := validateFlags.String("skills-dir", "./testdata/skills", "directory containing skill JSON files")
 	casesFile := validateFlags.String("cases-file", "./testdata/cases/mvp.jsonl", "path to testcase JSONL file")
+	jsonOutput := validateFlags.Bool("json", false, "emit machine-readable JSON output")
 
 	if err := validateFlags.Parse(args); err != nil {
 		return err
@@ -87,28 +102,31 @@ func validateCommand(args []string) error {
 
 	skills, validationErrors := validate.SkillFiles(*skillsDir)
 	if len(validationErrors) > 0 {
-		for _, validationError := range validationErrors {
-			fmt.Fprintf(os.Stderr, "- %s\n", validationError)
-		}
-		return fmt.Errorf("validation failed with %d error(s)", len(validationErrors))
+		return reportValidateFailure(*jsonOutput, len(skills), 0, validationErrors)
 	}
 
 	reg, err := registry.LoadSkills(*skillsDir)
 	if err != nil {
-		return fmt.Errorf("load skills: %w", err)
+		return reportValidateFailure(*jsonOutput, len(skills), 0, []string{fmt.Sprintf("load skills: %v", err)})
 	}
 
 	testCases, err := runner.LoadTestCases(*casesFile)
 	if err != nil {
-		return fmt.Errorf("load testcases: %w", err)
+		return reportValidateFailure(*jsonOutput, len(skills), 0, []string{fmt.Sprintf("load testcases: %v", err)})
 	}
 
 	validationErrors = validate.All(skills, testCases, reg)
 	if len(validationErrors) > 0 {
-		for _, validationError := range validationErrors {
-			fmt.Fprintf(os.Stderr, "- %s\n", validationError)
-		}
-		return fmt.Errorf("validation failed with %d error(s)", len(validationErrors))
+		return reportValidateFailure(*jsonOutput, len(skills), len(testCases), validationErrors)
+	}
+
+	if *jsonOutput {
+		return writeValidateJSON(validateResult{
+			OK:              true,
+			SkillsLoaded:    len(skills),
+			TestCasesLoaded: len(testCases),
+			Errors:          []string{},
+		})
 	}
 
 	fmt.Printf("skills loaded: %d\n", len(skills))
@@ -117,8 +135,39 @@ func validateCommand(args []string) error {
 	return nil
 }
 
+func reportValidateFailure(jsonOutput bool, skillsLoaded, testCasesLoaded int, validationErrors []string) error {
+	if jsonOutput {
+		if err := writeValidateJSON(validateResult{
+			OK:              false,
+			SkillsLoaded:    skillsLoaded,
+			TestCasesLoaded: testCasesLoaded,
+			Errors:          validationErrors,
+		}); err != nil {
+			return err
+		}
+		return errAlreadyReported
+	}
+
+	for _, validationError := range validationErrors {
+		fmt.Fprintf(os.Stderr, "- %s\n", validationError)
+	}
+	return fmt.Errorf("validation failed with %d error(s)", len(validationErrors))
+}
+
+func writeValidateJSON(result validateResult) error {
+	data, err := json.MarshalIndent(result, "", "  ")
+	if err != nil {
+		return fmt.Errorf("marshal validate result: %w", err)
+	}
+	data = append(data, '\n')
+	if _, err := os.Stdout.Write(data); err != nil {
+		return fmt.Errorf("write validate result: %w", err)
+	}
+	return nil
+}
+
 func printUsage() {
 	fmt.Fprintln(os.Stderr, "usage:")
 	fmt.Fprintln(os.Stderr, "  agent-eval run [--skills-dir PATH] [--cases-file PATH] [--out PATH]")
-	fmt.Fprintln(os.Stderr, "  agent-eval validate [--skills-dir PATH] [--cases-file PATH]")
+	fmt.Fprintln(os.Stderr, "  agent-eval validate [--skills-dir PATH] [--cases-file PATH] [--json]")
 }

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -40,6 +41,27 @@ func TestValidateSuccess(t *testing.T) {
 	}
 }
 
+func TestValidateJSONSuccess(t *testing.T) {
+	output, err := runCLI(t, "validate", "--json")
+	if err != nil {
+		t.Fatalf("expected validate --json to succeed, got error: %v\noutput: %s", err, output)
+	}
+
+	var result validateResult
+	if err := json.Unmarshal([]byte(output), &result); err != nil {
+		t.Fatalf("expected valid JSON output, got error: %v\noutput: %s", err, output)
+	}
+	if !result.OK {
+		t.Fatalf("expected ok=true, got %+v", result)
+	}
+	if result.SkillsLoaded == 0 || result.TestCasesLoaded == 0 {
+		t.Fatalf("expected non-zero counts, got %+v", result)
+	}
+	if len(result.Errors) != 0 {
+		t.Fatalf("expected no errors, got %+v", result)
+	}
+}
+
 func TestValidateDuplicateCaseID(t *testing.T) {
 	casesFile := writeTempCasesFile(t,
 		`{"case_id":"dup_case","prompt":"hello","allowed_tools":[],"skill":{"name":"hello_world"},"hard_checks":{"expected_output":"hello world"},"timeout_seconds":3}`,
@@ -52,6 +74,34 @@ func TestValidateDuplicateCaseID(t *testing.T) {
 	}
 	if !strings.Contains(output, "duplicate case_id") {
 		t.Fatalf("expected duplicate case_id message, got: %s", output)
+	}
+}
+
+func TestValidateJSONFailure(t *testing.T) {
+	casesFile := writeTempCasesFile(t,
+		`{"case_id":"missing_skill_case","prompt":"hello","allowed_tools":[],"skill":{"name":"missing_skill"},"hard_checks":{"expected_output":"hello"},"timeout_seconds":3}`,
+	)
+
+	output, err := runCLI(t, "validate", "--json", "--cases-file", casesFile)
+	if err == nil {
+		t.Fatal("expected validate --json to fail for missing skill")
+	}
+
+	var result validateResult
+	if err := json.Unmarshal([]byte(output), &result); err != nil {
+		t.Fatalf("expected valid JSON output, got error: %v\noutput: %s", err, output)
+	}
+	if result.OK {
+		t.Fatalf("expected ok=false, got %+v", result)
+	}
+	if result.TestCasesLoaded != 1 {
+		t.Fatalf("expected testcases_loaded=1, got %+v", result)
+	}
+	if len(result.Errors) == 0 {
+		t.Fatalf("expected errors, got %+v", result)
+	}
+	if !containsAny(result.Errors, "referenced skill") && !containsAny(result.Errors, "not found") {
+		t.Fatalf("expected referenced skill error, got %+v", result)
 	}
 }
 
@@ -150,4 +200,13 @@ func repoRoot(t *testing.T) string {
 		t.Fatalf("getwd failed: %v", err)
 	}
 	return filepath.Clean(filepath.Join(wd, "..", ".."))
+}
+
+func containsAny(values []string, needle string) bool {
+	for _, value := range values {
+		if strings.Contains(value, needle) {
+			return true
+		}
+	}
+	return false
 }
