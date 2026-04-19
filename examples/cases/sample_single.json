@@ -1,0 +1,18 @@
+[
+  {
+    "id": "hello-world",
+    "prompt": "Write a short final answer that says hello from the new agent framework.",
+    "checkers": [
+      {
+        "type": "non_empty"
+      }
+    ],
+    "metadata": {
+      "suite": "sample"
+    },
+    "tags": [
+      "quickstart",
+      "single"
+    ]
+  }
+]

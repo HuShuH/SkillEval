@@ -1,0 +1,267 @@
+:root {
+  color-scheme: light;
+  --border: #d8dee9;
+  --muted: #667085;
+  --bg: #f7f8fa;
+  --panel: #ffffff;
+  --accent: #2563eb;
+  --danger: #b42318;
+  --warning: #b54708;
+  --success: #027a48;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  background: var(--bg);
+  color: #101828;
+}
+
+header {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  align-items: center;
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid var(--border);
+  background: var(--panel);
+}
+
+h1,
+h2,
+h3,
+p {
+  margin: 0;
+}
+
+h1 {
+  font-size: 1.35rem;
+}
+
+h2 {
+  font-size: 1.05rem;
+  margin-bottom: 0.75rem;
+}
+
+h3 {
+  margin-top: 1rem;
+  font-size: 0.95rem;
+}
+
+p,
+.status {
+  color: var(--muted);
+}
+
+button {
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+  padding: 0.45rem 0.7rem;
+  background: #fff;
+  cursor: pointer;
+}
+
+button:hover {
+  border-color: var(--accent);
+}
+
+main {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1rem;
+  padding: 1rem;
+}
+
+.panel {
+  min-height: 22rem;
+  padding: 1rem;
+  border: 1px solid var(--border);
+  border-radius: 0.75rem;
+  background: var(--panel);
+  overflow: auto;
+}
+
+.wide {
+  grid-column: 1 / -1;
+}
+
+.row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.section-toolbar {
+  margin-top: 1rem;
+}
+
+.inline-control {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+select {
+  border: 1px solid var(--border);
+  border-radius: 0.45rem;
+  padding: 0.35rem 0.5rem;
+  background: #fff;
+}
+
+.card {
+  border: 1px solid var(--border);
+  border-radius: 0.6rem;
+  padding: 0.75rem;
+  margin-top: 0.6rem;
+  background: #fff;
+}
+
+.clickable {
+  cursor: pointer;
+}
+
+.clickable:hover {
+  border-color: var(--accent);
+}
+
+.state-ok {
+  border-left: 4px solid var(--success);
+}
+
+.state-warning {
+  border-left: 4px solid var(--warning);
+}
+
+.state-error {
+  border-left: 4px solid var(--danger);
+}
+
+.meta {
+  color: var(--muted);
+  font-size: 0.85rem;
+  margin-top: 0.25rem;
+}
+
+.summary-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.5rem;
+}
+
+.kv {
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+  padding: 0.5rem;
+}
+
+.kv strong {
+  display: block;
+}
+
+.events {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.85rem;
+}
+
+.event {
+  border-left: 3px solid var(--accent);
+  padding: 0.6rem;
+  margin-top: 0.6rem;
+  background: #f8fbff;
+  white-space: pre-wrap;
+}
+
+.event-normal {
+  border-left-color: var(--accent);
+  background: #f8fbff;
+}
+
+.event-error {
+  border-left-color: var(--danger);
+  background: #fff5f5;
+}
+
+.event-warning,
+.event-retry {
+  border-left-color: var(--warning);
+  background: #fffaeb;
+}
+
+.event-title {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.event-message {
+  margin-top: 0.4rem;
+}
+
+.event-inline {
+  margin-top: 0.4rem;
+  color: var(--muted);
+}
+
+.badge {
+  display: inline-block;
+  padding: 0.15rem 0.45rem;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  background: #eef2ff;
+  color: #1d4ed8;
+}
+
+.badge.event-error {
+  background: #fee4e2;
+  color: var(--danger);
+}
+
+.badge.event-warning,
+.badge.event-retry {
+  background: #fef0c7;
+  color: var(--warning);
+}
+
+.alert {
+  border: 1px solid var(--border);
+  border-radius: 0.6rem;
+  padding: 0.7rem 0.8rem;
+  margin-bottom: 0.8rem;
+}
+
+.error-alert {
+  border-color: #fecdca;
+  background: #fff6f5;
+  color: var(--danger);
+}
+
+details {
+  margin-top: 0.5rem;
+}
+
+pre {
+  overflow: auto;
+  background: #f8fafc;
+  padding: 0.7rem;
+  border-radius: 0.5rem;
+  border: 1px solid var(--border);
+}
+
+.error {
+  color: var(--danger);
+}
+
+@media (max-width: 900px) {
+  main {
+    grid-template-columns: 1fr;
+  }
+}

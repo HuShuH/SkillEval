@@ -1,0 +1,27 @@
+{
+  "mode": "pair",
+  "cases": "examples/cases/sample_pair.json",
+  "provider": {
+    "name": "openai",
+    "model": "gpt-4o-mini",
+    "base_url": "https://api.openai.com/v1",
+    "api_key_env": "OPENAI_API_KEY",
+    "provider_timeout": "30s"
+  },
+  "execution": {
+    "timeout": "3m",
+    "max_retries": 2,
+    "retry_backoff_ms": 250,
+    "max_iters": 4,
+    "workspace_root": "."
+  },
+  "output": {
+    "output_dir": "reports/pair-openai",
+    "run_id": "sample-pair-openai",
+    "html_report": true
+  },
+  "skills": {
+    "skill_a": "examples/skills/simple-writer",
+    "skill_b": "examples/skills/cautious-writer"
+  }
+}

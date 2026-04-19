@@ -1,166 +1,104 @@
- # Agent Instructions for Go Agent Skill Evaluation Framework
+# Agent Instructions for Agent Skill Eval
 
-  ## Project Goal
+## Repository Status
 
-  Build a minimal, reliable MVP for a Go-based agent skill evaluation framework.
+This repository is in migration from the original legacy MVP toward a new A/B Skill Evaluation Framework.
 
-  This repository is currently focused on the smallest runnable version only.
-  Do not design for advanced capabilities yet.
+During this phase:
 
-  ## Current Scope
+- keep the repository buildable at every step
+- preserve current behavior unless the task explicitly changes it
+- prefer compatibility-first migration before replacement
+- align implementation with the docs before adding new modules
 
-  Only build the following MVP components:
+## Architecture References
 
-  - skill registry
-  - testcase loader
-  - mock adapter
-  - hard checker
-  - runner
-  - report
-  - CLI run
+Use these documents as the migration references:
 
-  ## Out of Scope
+- `docs/BACKEND_ARCHITECTURE.md` for the target backend architecture
+- `docs/design.md` for the overall design intent
+- `docs/IMPLEMENTATION_ROADMAP.md` for implementation order
 
-  Do not add these capabilities in the current stage:
+`docs/frontend-design.md` is a forward-looking reference for later `server/` and `web/` work and must not be treated as already implemented.
 
-  - multi-agent orchestration
-  - LLM judge
-  - web search
-  - memory systems
-  - sandboxing
-  - distributed execution
-  - cloud deployment
-  - GUI or web frontend
+## Legacy Compatibility Layer
 
-  ## Engineering Principles
+The following paths are currently retained as a legacy / compatibility layer and should stay in place unless a task explicitly replaces them:
 
-  - Use Go as the primary language for all core logic.
-  - Keep the implementation minimal and runnable.
-  - Prefer simple, explicit designs over abstraction-heavy architecture.
-  - Build only what is needed for the current step.
-  - Avoid speculative extension points unless they clearly support the MVP.
-  - Keep modules small, testable, and easy to replace later.
+- `cmd/agent-eval`
+- `internal/*`
 
-  ## Development Workflow
+Do not remove or rewrite these areas wholesale during repository governance or migration prep.
+Prefer compatibility bridges and phased replacement.
 
-  - Develop incrementally.
-  - Each task should change only one small piece of the system at a time.
-  - After every change, the project must still compile locally.
-  - Prefer small PR-sized changes over large refactors.
-  - Do not mix unrelated changes in one step.
-  - If a design is uncertain, choose the simplest version that keeps forward progress.
+## Allowed New Modules
 
-  ## Build Discipline
+The migration may introduce these new top-level modules when required:
 
-  - Every change must preserve local buildability.
-  - Before finishing a task, verify the code can compile.
-  - If tests exist for the touched area, run them.
-  - Do not leave the repository in a partially broken state.
+- `agent/`
+- `eval/`
+- `providers/`
+- `skill/`
+- `tool/`
+- `server/`
+- `web/`
 
-  ## Git Checkpoints
+A root `main.go` is also allowed for the new entrypoint.
 
-  - Create a git checkpoint before major changes.
-  - Create another git checkpoint after completing a stable step.
-  - Keep commit scope small and meaningful.
-  - Use commit messages that describe the concrete engineering change.
+## Allowed Capability Expansion
 
-  ## Recommended Go-Oriented Layout
+The migration may introduce the following capabilities when explicitly in scope:
 
-  This structure is a guideline for the MVP:
+- OpenAI-compatible providers
+- A/B evaluation
+- event streaming
+- SSE
+- HTML reports
 
-  - cmd/
-      - CLI entrypoints
-  - internal/
-      - application internals
-      - registry/
-      - testcase/
-      - adapter/
-      - checker/
-      - runner/
-      - report/
-  - pkg/
-      - only for reusable public packages if truly needed
-  - configs/
-      - static config samples if needed
-  - testdata/
-      - testcase fixtures and mock inputs
-  - docs/
-      - short design notes and MVP docs
+Do not present planned capabilities as completed features.
 
-  Prefer internal/ for most implementation during the MVP stage.
+## Engineering Discipline
 
-  ## Current Phase File Boundaries
+- Use Go as the primary language for backend logic.
+- Keep changes incremental, explicit, and easy to review.
+- Preserve local compilability after every step.
+- Prefer adding or updating tests around touched behavior when practical.
+- Keep old behavior working before replacing it.
+- Avoid broad refactors unless the task clearly requires them.
 
-  In the current first phase, only prioritize creating or modifying these files and paths:
+## Migration Workflow
 
-  - cmd/agent-eval/main.go
-  - internal/spec/types.go
-  - internal/registry/registry.go
-  - internal/adapters/adapter.go
-  - internal/adapters/mock.go
-  - internal/checker/checker.go
-  - internal/runner/runner.go
-  - internal/report/report.go
-  - testdata/skills/
-  - testdata/cases/
+For each step:
 
-  During this phase, do not add:
+1. choose one concrete target
+2. implement it with minimal surface area
+3. verify build or tests for the touched scope
+4. keep the repository stable
+5. then move to the next step
 
-  - OpenAI adapter
-  - network calls
-  - databases
-  - concurrent execution
-  - extra CLI subcommands
+Prefer small checkpoint-worthy changes over large rewrites.
 
-  If a proposed change requires files outside this boundary, stop and confirm the need before expanding scope.
+## Scope Guardrails
 
-  ## MVP Component Expectations
+When the task is repository governance, documentation alignment, cleanup, or migration prep:
 
-  - skill registry: register and resolve available skills
-  - testcase loader: load testcase definitions from local files
-  - mock adapter: provide deterministic mock execution behavior
-  - hard checker: evaluate outputs with explicit rule-based checks
-  - runner: connect registry, loader, adapter, checker, and execution flow
-  - report: emit simple structured evaluation results
-  - CLI run: provide a minimal command to execute evaluations locally
+- update docs and repository metadata as needed
+- clean up generated artifacts and ignore rules when confirmed
+- avoid unnecessary runtime behavior changes
+- avoid large edits to `cmd/` and `internal/`
 
-  ## Coding Guidance
+When the task is implementation:
 
-  - Favor standard library solutions first.
-  - Keep interfaces small and only introduce them when they help the current MVP.
-  - Avoid premature generic frameworks.
-  - Prefer deterministic behavior for runner, adapter, and checker.
-  - Keep output formats simple and machine-readable.
-  - Write code that is easy to debug from the CLI.
+- use `docs/BACKEND_ARCHITECTURE.md` and `docs/design.md` as the target architecture references
+- use `docs/IMPLEMENTATION_ROADMAP.md` as the sequencing reference
+- keep legacy CLI and internals working until intentional replacement is complete
 
-  ## Task Boundaries
+## Definition Of Done
 
-  When implementing new work:
+A step is complete only if:
 
-  - choose one small target
-  - implement it fully
-  - verify it compiles
-  - checkpoint with git
-  - then move to the next step
-
-  Do not jump ahead to advanced architecture.
-
-  ## Definition of Done for Each Step
-
-  A step is complete only if:
-
-  - the targeted change is implemented
-  - the code compiles locally
-  - related tests pass if present
-  - no unrelated files were changed unnecessarily
-  - the change is ready for a git checkpoint
-
-  ## Communication Style
-
-  When proposing or making changes:
-
-  - be concise
-  - be concrete
-  - state assumptions clearly
-  - focus on the immediate next engineering step
-  - avoid broad redesign unless explicitly requested
+- the targeted change is finished
+- the repository still builds locally
+- relevant tests pass when they exist
+- no unrelated files were changed unnecessarily
+- the result is ready for a small checkpoint commit

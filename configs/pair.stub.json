@@ -1,0 +1,20 @@
+{
+  "mode": "pair",
+  "cases": "examples/cases/sample_pair.json",
+  "provider": {
+    "name": "stub"
+  },
+  "execution": {
+    "max_iters": 3,
+    "workspace_root": "."
+  },
+  "output": {
+    "output_dir": "reports/pair-stub",
+    "run_id": "sample-pair-stub",
+    "html_report": true
+  },
+  "skills": {
+    "skill_a": "examples/skills/simple-writer",
+    "skill_b": "examples/skills/cautious-writer"
+  }
+}

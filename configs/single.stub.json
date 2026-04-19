@@ -1,0 +1,19 @@
+{
+  "mode": "single",
+  "cases": "examples/cases/sample_single.json",
+  "provider": {
+    "name": "stub"
+  },
+  "execution": {
+    "max_iters": 3,
+    "workspace_root": "."
+  },
+  "output": {
+    "output_dir": "reports/single-stub",
+    "run_id": "sample-single-stub",
+    "html_report": true
+  },
+  "skills": {
+    "skill_a": "examples/skills/simple-writer"
+  }
+}

@@ -1,0 +1,19 @@
+# Go build outputs
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+coverage.out
+cover.out
+
+# Repository-local binaries
+/agent-eval
+/agent-skill-eval
+
+# Common build directories
+/bin/
+/build/
+/dist/

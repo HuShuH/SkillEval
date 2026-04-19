@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Agent Skill Eval</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <header>
+      <div>
+        <h1>Agent Skill Eval</h1>
+        <p>Read-only run browser with report, event, and SSE views.</p>
+      </div>
+      <button id="refresh-runs">Refresh Runs</button>
+    </header>
+
+    <main>
+      <section class="panel">
+        <div class="row section-toolbar">
+          <h2>Runs</h2>
+          <label class="inline-control">
+            <span>Filter</span>
+            <select id="run-filter">
+              <option value="all">All</option>
+              <option value="failed">Failed</option>
+              <option value="errored">Errored</option>
+              <option value="timed_out">Timed Out</option>
+              <option value="single">Single</option>
+              <option value="pair">Pair</option>
+            </select>
+          </label>
+        </div>
+        <div id="runs-status" class="status">Loading runs...</div>
+        <div id="runs-list" class="list"></div>
+      </section>
+
+      <section class="panel">
+        <h2>Report</h2>
+        <div id="report-status" class="status">Select a run.</div>
+        <div id="report-alerts"></div>
+        <div id="report-summary"></div>
+        <div class="row section-toolbar">
+          <h3>Cases</h3>
+          <label class="inline-control">
+            <span>Filter</span>
+            <select id="case-filter">
+              <option value="all">All cases</option>
+              <option value="failed">Failed only</option>
+              <option value="timed">Timed out / canceled</option>
+            </select>
+          </label>
+        </div>
+        <div id="cases-list" class="list"></div>
+      </section>
+
+      <section class="panel">
+        <div class="row section-toolbar">
+          <h2>Case Events</h2>
+          <label class="inline-control">
+            <span>Filter</span>
+            <select id="event-filter">
+              <option value="all">All</option>
+              <option value="errors">Errors only</option>
+              <option value="retries">Retries only</option>
+            </select>
+          </label>
+        </div>
+        <div id="events-status" class="status">Select a case.</div>
+        <div id="events-list" class="events"></div>
+      </section>
+
+      <section class="panel wide">
+        <div class="row">
+          <h2>Live Events</h2>
+          <button id="connect-stream">Connect Stream</button>
+        </div>
+        <div id="live-status" class="status">Select a run, then connect.</div>
+        <div id="live-events" class="events"></div>
+      </section>
+    </main>
+
+    <script src="/app.js"></script>
+  </body>
+</html>

@@ -1,0 +1,18 @@
+[
+  {
+    "id": "pair-hello-world",
+    "prompt": "Return a short greeting that demonstrates the pair evaluation flow.",
+    "checkers": [
+      {
+        "type": "non_empty"
+      }
+    ],
+    "metadata": {
+      "suite": "sample"
+    },
+    "tags": [
+      "quickstart",
+      "pair"
+    ]
+  }
+]
